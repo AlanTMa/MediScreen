@@ -1,0 +1,107 @@
+{
+  "call_sid": "CA5a4c382fe3a21a3179f59bf82a35fce3",
+  "from_number": "+16692909608",
+  "start_time": 1761430499.6760128,
+  "duration": 64.34769439697266,
+  "summary": {
+    "trial_name": "Clinical Research Study",
+    "conversation_stage": "conclusion",
+    "questions_asked": 7,
+    "patient_info": {
+      "age": null,
+      "medical_conditions": null,
+      "medications": null,
+      "pregnant": false,
+      "severe_conditions": false,
+      "contact_info": null,
+      "phone_area_code": null,
+      "phone_middle": "111",
+      "phone_last_four": null
+    },
+    "eligible": false,
+    "conversation_log": [
+      {
+        "stage": "greeting",
+        "response": "\n        Hello! Thank you for calling about our Clinical Research Study. \n        I'm here to help you learn more about this study and see if you might be a good fit. \n        This will take about 5 minutes. Are you ready to begin?\n        "
+      },
+      {
+        "stage": "greeting",
+        "patient_response": "Yes."
+      },
+      {
+        "stage": "screening",
+        "question": "What is your age?",
+        "question_index": 0
+      },
+      {
+        "stage": "screening",
+        "patient_response": "25."
+      },
+      {
+        "stage": "screening",
+        "question": "Have you been diagnosed with any medical conditions?",
+        "question_index": 1
+      },
+      {
+        "stage": "screening",
+        "patient_response": "No."
+      },
+      {
+        "stage": "screening",
+        "question": "Are you currently taking any medications?",
+        "question_index": 2
+      },
+      {
+        "stage": "screening",
+        "patient_response": "No."
+      },
+      {
+        "stage": "screening",
+        "question": "Are you currently pregnant or nursing?",
+        "question_index": 3
+      },
+      {
+        "stage": "screening",
+        "patient_response": "No."
+      },
+      {
+        "stage": "screening",
+        "question": "Do you have any severe medical conditions that require ongoing treatment?",
+        "question_index": 4
+      },
+      {
+        "stage": "screening",
+        "patient_response": "No."
+      },
+      {
+        "stage": "screening",
+        "question": "What is the best phone number to reach you for follow-up? Please say the first 3 digits of your area code.",
+        "question_index": 5
+      },
+      {
+        "stage": "screening",
+        "patient_response": "111."
+      },
+      {
+        "stage": "screening",
+        "extracted_middle": "111",
+        "original_response": "111."
+      },
+      {
+        "stage": "screening",
+        "question": "Now please say the next 3 digits of your phone number.",
+        "question_index": 6
+      },
+      {
+        "stage": "screening",
+        "patient_response": "234."
+      },
+      {
+        "stage": "conclusion",
+        "eligible": false,
+        "conclusion": "\n            Thank you for your interest in our Clinical Research Study. \n            Based on your responses, you may not be eligible for this particular study, \n            but we will keep your information for future research opportunities. \n            Thank you for your time.\n            "
+      }
+    ]
+  },
+  "timestamp": 1761430564.0237083
+}

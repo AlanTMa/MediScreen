@@ -24,8 +24,6 @@ class PatientInfo:
     phone_area_code: Optional[str] = None
     phone_middle: Optional[str] = None
     phone_last_four: Optional[str] = None
-    phone_last_two_first: Optional[str] = None
-    phone_last_two_second: Optional[str] = None
 
 class ClinicalTrialVoiceAgent:
     """
@@ -115,6 +113,7 @@ class ClinicalTrialVoiceAgent:
             print(f"DEBUG: Processing response '{speech_text}'")
             print(f"DEBUG: Current question index: {self.current_question_index}")
             print(f"DEBUG: Total questions: {len(self.screening_questions)}")
+            print(f"DEBUG: Conversation stage: {self.conversation_stage}")
             
             # Log the patient's response
             self.conversation_log.append({
@@ -122,24 +121,42 @@ class ClinicalTrialVoiceAgent:
                 "patient_response": speech_text
             })
             
+            # If we're in greeting stage, just ask the first question
+            if self.conversation_stage == "greeting":
+                print(f"DEBUG: In greeting stage, asking first question")
+                self.conversation_stage = "screening"
+                return self._ask_next_question()
+            
             # Extract information from response
             self._extract_patient_info(speech_text)
             
-            # Determine next step
-            if self.current_question_index < len(self.screening_questions):
-                print(f"DEBUG: Asking next question (index {self.current_question_index})")
-                return self._ask_next_question()
-            else:
+            # Increment question index after processing response
+            self.current_question_index += 1
+            
+            # Determine next step - check if we've completed all questions
+            if self.current_question_index >= len(self.screening_questions):
                 print(f"DEBUG: Generating conclusion (no more questions)")
                 return self._generate_screening_conclusion()
+            else:
+                print(f"DEBUG: Asking next question (index {self.current_question_index})")
+                return self._ask_next_question()
                 
         except Exception as e:
             logger.error(f"Error processing patient response: {e}")
+            print(f"DEBUG: Exception occurred: {e}")
+            print(f"DEBUG: Exception type: {type(e)}")
+            import traceback
+            print(f"DEBUG: Traceback: {traceback.format_exc()}")
             return "I apologize, but I'm having trouble processing your response. Could you please repeat that?"
     
     def _extract_patient_info(self, speech_text: str):
         """Extract structured information from patient's speech"""
         text_lower = speech_text.lower()
+        
+        # Check if we're still in the screening phase
+        if self.current_question_index >= len(self.screening_questions):
+            print(f"DEBUG: Conversation already complete, skipping extraction")
+            return
         
         print(f"DEBUG: Extracting info for field: {self.screening_questions[self.current_question_index]['field']}")
         
@@ -260,9 +277,16 @@ class ClinicalTrialVoiceAgent:
     
     def _ask_next_question(self) -> str:
         """Ask the next screening question"""
+        print(f"DEBUG: _ask_next_question called with index {self.current_question_index}")
+        print(f"DEBUG: Total questions: {len(self.screening_questions)}")
+        print(f"DEBUG: Index < Total: {self.current_question_index < len(self.screening_questions)}")
+        
+        # Check if we have more questions to ask
         if self.current_question_index < len(self.screening_questions):
             question_data = self.screening_questions[self.current_question_index]
             question = question_data["question"]
+            
+            print(f"DEBUG: Asking question: {question}")
             
             self.conversation_stage = "screening"
             
@@ -272,11 +296,11 @@ class ClinicalTrialVoiceAgent:
                 "question_index": self.current_question_index
             })
             
-            # Increment AFTER processing the current question
-            self.current_question_index += 1
+            # Index is incremented in the main processing loop
             
             return question
         
+        print(f"DEBUG: Going to conclusion")
         return self._generate_screening_conclusion()
     
     def _generate_screening_conclusion(self) -> str:
@@ -317,6 +341,12 @@ class ClinicalTrialVoiceAgent:
             return False
         
         if self.patient_info.pregnant:
+            return False
+
+        if self.patient_info.medications:
+            return False
+        
+        if self.patient_info.medical_conditions:
             return False
         
         if self.patient_info.severe_conditions:

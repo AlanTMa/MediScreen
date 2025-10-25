@@ -1,0 +1,118 @@
+{
+  "call_sid": "CAe28befbf9f6ffec1d8d4df1b1b96f1ca",
+  "from_number": "+16692909608",
+  "start_time": 1761431114.0270963,
+  "duration": 76.5940330028534,
+  "summary": {
+    "trial_name": "Clinical Research Study",
+    "conversation_stage": "conclusion",
+    "questions_asked": 8,
+    "patient_info": {
+      "age": null,
+      "medical_conditions": null,
+      "medications": null,
+      "pregnant": false,
+      "severe_conditions": false,
+      "contact_info": "408-646-1981",
+      "phone_area_code": "408",
+      "phone_middle": "646",
+      "phone_last_four": "1981"
+    },
+    "eligible": false,
+    "conversation_log": [
+      {
+        "stage": "greeting",
+        "response": "\n        Hello! Thank you for calling about our Clinical Research Study. \n        I'm here to help you learn more about this study and see if you might be a good fit. \n        This will take about 5 minutes. Are you ready to begin?\n        "
+      },
+      {
+        "stage": "greeting",
+        "patient_response": "Yes."
+      },
+      {
+        "stage": "screening",
+        "question": "Have you been diagnosed with any medical conditions?",
+        "question_index": 1
+      },
+      {
+        "stage": "screening",
+        "patient_response": "No."
+      },
+      {
+        "stage": "screening",
+        "question": "Are you currently taking any medications?",
+        "question_index": 2
+      },
+      {
+        "stage": "screening",
+        "patient_response": "No."
+      },
+      {
+        "stage": "screening",
+        "question": "Are you currently pregnant or nursing?",
+        "question_index": 3
+      },
+      {
+        "stage": "screening",
+        "patient_response": "No."
+      },
+      {
+        "stage": "screening",
+        "question": "Do you have any severe medical conditions that require ongoing treatment?",
+        "question_index": 4
+      },
+      {
+        "stage": "screening",
+        "patient_response": "No."
+      },
+      {
+        "stage": "screening",
+        "question": "What is the best phone number to reach you for follow-up? Please say the first 3 digits of your area code.",
+        "question_index": 5
+      },
+      {
+        "stage": "screening",
+        "patient_response": "408."
+      },
+      {
+        "stage": "screening",
+        "extracted_area_code": "408",
+        "original_response": "408."
+      },
+      {
+        "stage": "screening",
+        "question": "Now please say the next 3 digits of your phone number.",
+        "question_index": 6
+      },
+      {
+        "stage": "screening",
+        "patient_response": "646."
+      },
+      {
+        "stage": "screening",
+        "extracted_middle": "646",
+        "original_response": "646."
+      },
+      {
+        "stage": "screening",
+        "question": "Finally, please say the last 4 digits of your phone number.",
+        "question_index": 7
+      },
+      {
+        "stage": "screening",
+        "patient_response": "1981."
+      },
+      {
+        "stage": "screening",
+        "extracted_last_four": "1981",
+        "full_phone": "408-646-1981",
+        "original_response": "1981."
+      },
+      {
+        "stage": "conclusion",
+        "eligible": false,
+        "conclusion": "\n            Thank you for your interest in our Clinical Research Study. \n            Based on your responses, you may not be eligible for this particular study, \n            but we will keep your information for future research opportunities. \n            Thank you for your time.\n            "
+      }
+    ]
+  },
+  "timestamp": 1761431190.6211312
+}
