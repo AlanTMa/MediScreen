@@ -1,0 +1,142 @@
+{
+  "call_sid": "CA0cb62b67349c48459def2a2bcd984b1f",
+  "from_number": "+16692909608",
+  "start_time": 1761432732.7156785,
+  "duration": 104.651043176651,
+  "summary": {
+    "trial_name": "Clinical Research Study",
+    "conversation_stage": "conclusion",
+    "questions_asked": 9,
+    "patient_info": {
+      "age": 20,
+      "medical_conditions": null,
+      "medications": null,
+      "pregnant": false,
+      "severe_conditions": false,
+      "contact_info": "669-290-9608",
+      "phone_area_code": "669",
+      "phone_middle": "290",
+      "phone_last_four": "9608",
+      "availability_date": "October 15th."
+    },
+    "eligible": true,
+    "conversation_log": [
+      {
+        "stage": "greeting",
+        "response": "\n        Hello! Thank you for calling about our Clinical Research Study. \n        I'm here to help you learn more about this study and see if you might be a good fit. \n        This will take about 5 minutes. Are you ready to begin?\n        "
+      },
+      {
+        "stage": "greeting",
+        "patient_response": "Yes."
+      },
+      {
+        "stage": "screening",
+        "question": "What is your age?",
+        "question_index": 0
+      },
+      {
+        "stage": "screening",
+        "patient_response": "20."
+      },
+      {
+        "stage": "screening",
+        "question": "Have you been diagnosed with any medical conditions?",
+        "question_index": 1
+      },
+      {
+        "stage": "screening",
+        "patient_response": "No."
+      },
+      {
+        "stage": "screening",
+        "question": "Are you currently taking any medications?",
+        "question_index": 2
+      },
+      {
+        "stage": "screening",
+        "patient_response": "No."
+      },
+      {
+        "stage": "screening",
+        "question": "Are you currently pregnant or nursing?",
+        "question_index": 3
+      },
+      {
+        "stage": "screening",
+        "patient_response": "No."
+      },
+      {
+        "stage": "screening",
+        "question": "Do you have any severe medical conditions that require ongoing treatment?",
+        "question_index": 4
+      },
+      {
+        "stage": "screening",
+        "patient_response": "No."
+      },
+      {
+        "stage": "screening",
+        "question": "What is the best phone number to reach you for follow-up? Please say the first 3 digits of your area code.",
+        "question_index": 5
+      },
+      {
+        "stage": "screening",
+        "patient_response": "669."
+      },
+      {
+        "stage": "screening",
+        "extracted_area_code": "669",
+        "original_response": "669."
+      },
+      {
+        "stage": "screening",
+        "question": "Now please say the next 3 digits of your phone number.",
+        "question_index": 6
+      },
+      {
+        "stage": "screening",
+        "patient_response": "290."
+      },
+      {
+        "stage": "screening",
+        "extracted_middle": "290",
+        "original_response": "290."
+      },
+      {
+        "stage": "screening",
+        "question": "Finally, please say the last 4 digits of your phone number.",
+        "question_index": 7
+      },
+      {
+        "stage": "screening",
+        "patient_response": "9608."
+      },
+      {
+        "stage": "screening",
+        "extracted_last_four": "9608",
+        "full_phone": "669-290-9608",
+        "original_response": "9608."
+      },
+      {
+        "stage": "screening",
+        "question": "What is the next date when you would be available for a screening visit? You can say it like 'ten sixteen' for October 16th, or 'October sixteenth', or 'the sixteenth of October'.",
+        "question_index": 8
+      },
+      {
+        "stage": "screening",
+        "patient_response": "October 15th."
+      },
+      {
+        "stage": "screening",
+        "extracted_date": "October 15th.",
+        "original_response": "October 15th."
+      },
+      {
+        "stage": "conclusion",
+        "eligible": true,
+        "conclusion": "\n            Thank you for answering all the questions. Based on your responses, \n            you appear to be a potential candidate for our Clinical Research Study. \n            We will contact you within 24 hours to schedule a screening visit \n            and provide more details about the study. \n            Have a great day!\n            "
+      }
+    ]
+  },
+  "timestamp": 1761432837.3667238
+}

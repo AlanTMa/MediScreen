@@ -24,6 +24,7 @@ class PatientInfo:
     phone_area_code: Optional[str] = None
     phone_middle: Optional[str] = None
     phone_last_four: Optional[str] = None
+    availability_date: Optional[str] = None
 
 class ClinicalTrialVoiceAgent:
     """
@@ -82,6 +83,11 @@ class ClinicalTrialVoiceAgent:
             {
                 "question": "Finally, please say the last 4 digits of your phone number.",
                 "field": "phone_last_four",
+                "type": "text"
+            },
+            {
+                "question": "What is the next date when you would be available for a screening visit? You can say it like 'ten sixteen' for October 16th, or 'October sixteenth', or 'the sixteenth of October'.",
+                "field": "availability_date",
                 "type": "text"
             }
         ]
@@ -227,6 +233,18 @@ class ClinicalTrialVoiceAgent:
                         "full_phone": full_phone,
                         "original_response": speech_text
                     })
+        
+        elif "availability_date" in self.screening_questions[self.current_question_index]["field"]:
+            date_text = self._extract_date_from_speech(speech_text)
+            print(f"DEBUG: Availability date - Input: '{speech_text}', Extracted: '{date_text}'")
+            
+            if date_text:
+                self.patient_info.availability_date = date_text
+                self.conversation_log.append({
+                    "stage": "screening",
+                    "extracted_date": self.patient_info.availability_date,
+                    "original_response": speech_text
+                })
     
     def _extract_digits_from_speech(self, speech_text: str) -> List[str]:
         """Extract digits from speech text, handling both spoken numbers and digits"""
@@ -274,6 +292,109 @@ class ClinicalTrialVoiceAgent:
         print(f"DEBUG: Input='{speech_text}' -> Words={words} -> Digits={digits}")
         
         return digits
+    
+    def _extract_date_from_speech(self, speech_text: str) -> str:
+        """Extract date from speech text, handling various formats"""
+        import re
+        
+        text_lower = speech_text.lower().strip()
+        
+        # Month names mapping
+        months = {
+            'january': '01', 'jan': '01',
+            'february': '02', 'feb': '02',
+            'march': '03', 'mar': '03',
+            'april': '04', 'apr': '04',
+            'may': '05',
+            'june': '06', 'jun': '06',
+            'july': '07', 'jul': '07',
+            'august': '08', 'aug': '08',
+            'september': '09', 'sep': '09', 'sept': '09',
+            'october': '10', 'oct': '10',
+            'november': '11', 'nov': '11',
+            'december': '12', 'dec': '12'
+        }
+        
+        # Ordinal numbers mapping
+        ordinals = {
+            'first': '1', 'second': '2', 'third': '3', 'fourth': '4', 'fifth': '5',
+            'sixth': '6', 'seventh': '7', 'eighth': '8', 'ninth': '9', 'tenth': '10',
+            'eleventh': '11', 'twelfth': '12', 'thirteenth': '13', 'fourteenth': '14',
+            'fifteenth': '15', 'sixteenth': '16', 'seventeenth': '17', 'eighteenth': '18',
+            'nineteenth': '19', 'twentieth': '20', 'twenty-first': '21', 'twenty-second': '22',
+            'twenty-third': '23', 'twenty-fourth': '24', 'twenty-fifth': '25', 'twenty-sixth': '26',
+            'twenty-seventh': '27', 'twenty-eighth': '28', 'twenty-ninth': '29', 'thirtieth': '30',
+            'thirty-first': '31'
+        }
+        
+        # Regular numbers
+        numbers = {
+            'zero': '0', 'one': '1', 'two': '2', 'three': '3', 'four': '4', 'five': '5',
+            'six': '6', 'seven': '7', 'eight': '8', 'nine': '9', 'ten': '10',
+            'eleven': '11', 'twelve': '12', 'thirteen': '13', 'fourteen': '14', 'fifteen': '15',
+            'sixteen': '16', 'seventeen': '17', 'eighteen': '18', 'nineteen': '19', 'twenty': '20',
+            'twenty-one': '21', 'twenty-two': '22', 'twenty-three': '23', 'twenty-four': '24',
+            'twenty-five': '25', 'twenty-six': '26', 'twenty-seven': '27', 'twenty-eight': '28',
+            'twenty-nine': '29', 'thirty': '30', 'thirty-one': '31'
+        }
+        
+        # Pattern 1: "ten sixteen" -> "10/16"
+        pattern1 = r'(\w+)\s+(\w+)'
+        match1 = re.search(pattern1, text_lower)
+        if match1:
+            first_word = match1.group(1)
+            second_word = match1.group(2)
+            
+            # Check if first word is a month and second is a day
+            if first_word in months and second_word in numbers:
+                month = months[first_word]
+                day = numbers[second_word]
+                return f"{month}/{day}"
+            elif first_word in numbers and second_word in numbers:
+                # Could be month/day format
+                month = numbers[first_word]
+                day = numbers[second_word]
+                if int(month) <= 12 and int(day) <= 31:
+                    return f"{month}/{day}"
+        
+        # Pattern 2: "October sixteenth" or "October 16" or "dec 15"
+        pattern2 = r'(\w+)\s+(\w+)'
+        match2 = re.search(pattern2, text_lower)
+        if match2:
+            first_word = match2.group(1)
+            second_word = match2.group(2)
+            
+            if first_word in months:
+                month = months[first_word]
+                if second_word in ordinals:
+                    day = ordinals[second_word]
+                    return f"{month}/{day}"
+                elif second_word in numbers:
+                    day = numbers[second_word]
+                    return f"{month}/{day}"
+        
+        # Pattern 3: "the sixteenth of October"
+        pattern3 = r'the\s+(\w+)\s+of\s+(\w+)'
+        match3 = re.search(pattern3, text_lower)
+        if match3:
+            day_word = match3.group(1)
+            month_word = match3.group(2)
+            
+            if day_word in ordinals and month_word in months:
+                day = ordinals[day_word]
+                month = months[month_word]
+                return f"{month}/{day}"
+        
+        # Pattern 4: Direct numbers like "10/16" or "10 16"
+        pattern4 = r'(\d{1,2})[/\s]+(\d{1,2})'
+        match4 = re.search(pattern4, speech_text)
+        if match4:
+            month = match4.group(1)
+            day = match4.group(2)
+            return f"{month}/{day}"
+        
+        # If no pattern matches, return the original text
+        return speech_text
     
     def _ask_next_question(self) -> str:
         """Ask the next screening question"""
@@ -370,7 +491,8 @@ class ClinicalTrialVoiceAgent:
                 "contact_info": self.patient_info.contact_info,
                 "phone_area_code": self.patient_info.phone_area_code,
                 "phone_middle": self.patient_info.phone_middle,
-                "phone_last_four": self.patient_info.phone_last_four
+                "phone_last_four": self.patient_info.phone_last_four,
+                "availability_date": self.patient_info.availability_date
             },
             "eligible": self._assess_eligibility(),
             "conversation_log": self.conversation_log
