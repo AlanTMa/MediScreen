@@ -21,6 +21,11 @@ class PatientInfo:
     pregnant: Optional[bool] = None
     severe_conditions: Optional[bool] = None
     contact_info: Optional[str] = None
+    phone_area_code: Optional[str] = None
+    phone_middle: Optional[str] = None
+    phone_last_four: Optional[str] = None
+    phone_last_two_first: Optional[str] = None
+    phone_last_two_second: Optional[str] = None
 
 class ClinicalTrialVoiceAgent:
     """
@@ -67,8 +72,18 @@ class ClinicalTrialVoiceAgent:
                 "type": "boolean"
             },
             {
-                "question": "What is the best phone number to reach you for follow-up? Please say the number clearly, including the area code.",
-                "field": "contact_info",
+                "question": "What is the best phone number to reach you for follow-up? Please say the first 3 digits of your area code.",
+                "field": "phone_area_code",
+                "type": "text"
+            },
+            {
+                "question": "Now please say the next 3 digits of your phone number.",
+                "field": "phone_middle",
+                "type": "text"
+            },
+            {
+                "question": "Finally, please say the last 4 digits of your phone number.",
+                "field": "phone_last_four",
                 "type": "text"
             }
         ]
@@ -97,6 +112,10 @@ class ClinicalTrialVoiceAgent:
             AI response text
         """
         try:
+            print(f"DEBUG: Processing response '{speech_text}'")
+            print(f"DEBUG: Current question index: {self.current_question_index}")
+            print(f"DEBUG: Total questions: {len(self.screening_questions)}")
+            
             # Log the patient's response
             self.conversation_log.append({
                 "stage": self.conversation_stage,
@@ -108,8 +127,10 @@ class ClinicalTrialVoiceAgent:
             
             # Determine next step
             if self.current_question_index < len(self.screening_questions):
+                print(f"DEBUG: Asking next question (index {self.current_question_index})")
                 return self._ask_next_question()
             else:
+                print(f"DEBUG: Generating conclusion (no more questions)")
                 return self._generate_screening_conclusion()
                 
         except Exception as e:
@@ -119,6 +140,8 @@ class ClinicalTrialVoiceAgent:
     def _extract_patient_info(self, speech_text: str):
         """Extract structured information from patient's speech"""
         text_lower = speech_text.lower()
+        
+        print(f"DEBUG: Extracting info for field: {self.screening_questions[self.current_question_index]['field']}")
         
         # Extract age
         if "age" in self.screening_questions[self.current_question_index]["field"]:
@@ -150,75 +173,90 @@ class ClinicalTrialVoiceAgent:
             elif any(word in text_lower for word in ["no", "not severe", "mild"]):
                 self.patient_info.severe_conditions = False
         
-        # Extract contact info
-        elif "contact_info" in self.screening_questions[self.current_question_index]["field"]:
-            import re
-            
-            # Try multiple phone number patterns
-            phone_number = self._extract_phone_number(speech_text)
-            if phone_number:
-                self.patient_info.contact_info = phone_number
-                # Add confirmation to conversation log
+        # Extract phone number parts
+        elif "phone_area_code" in self.screening_questions[self.current_question_index]["field"]:
+            digits = self._extract_digits_from_speech(speech_text)
+            if len(digits) >= 3:
+                self.patient_info.phone_area_code = ''.join(digits[:3])
                 self.conversation_log.append({
                     "stage": "screening",
-                    "extracted_phone": phone_number,
+                    "extracted_area_code": self.patient_info.phone_area_code,
                     "original_response": speech_text
                 })
+        
+        elif "phone_middle" in self.screening_questions[self.current_question_index]["field"]:
+            digits = self._extract_digits_from_speech(speech_text)
+            if len(digits) >= 3:
+                self.patient_info.phone_middle = ''.join(digits[:3])
+                self.conversation_log.append({
+                    "stage": "screening",
+                    "extracted_middle": self.patient_info.phone_middle,
+                    "original_response": speech_text
+                })
+        
+        elif "phone_last_four" in self.screening_questions[self.current_question_index]["field"]:
+            digits = self._extract_digits_from_speech(speech_text)
+            print(f"DEBUG: Last four digits - Input: '{speech_text}', Found digits: {digits}, Length: {len(digits)}")
+            
+            if len(digits) >= 4:
+                self.patient_info.phone_last_four = ''.join(digits[:4])
+                # Combine all phone number parts
+                if self.patient_info.phone_area_code and self.patient_info.phone_middle:
+                    full_phone = f"{self.patient_info.phone_area_code}-{self.patient_info.phone_middle}-{self.patient_info.phone_last_four}"
+                    self.patient_info.contact_info = full_phone
+                    self.conversation_log.append({
+                        "stage": "screening",
+                        "extracted_last_four": self.patient_info.phone_last_four,
+                        "full_phone": full_phone,
+                        "original_response": speech_text
+                    })
     
-    def _extract_phone_number(self, speech_text: str) -> Optional[str]:
-        """Extract phone number from speech text using multiple patterns"""
+    def _extract_digits_from_speech(self, speech_text: str) -> List[str]:
+        """Extract digits from speech text, handling both spoken numbers and digits"""
         import re
         
-        # Clean the text
-        text = speech_text.lower().strip()
-        
-        # Pattern 1: Standard format (555-123-4567, 555.123.4567, 5551234567)
-        pattern1 = r'\b(\d{3}[-.]?\d{3}[-.]?\d{4})\b'
-        match = re.search(pattern1, speech_text)
-        if match:
-            return match.group(1)
-        
-        # Pattern 2: Spoken numbers (five five five, one two three, four five six seven)
+        # Dictionary for spoken numbers (expanded)
         spoken_digits = {
             'zero': '0', 'one': '1', 'two': '2', 'three': '3', 'four': '4',
             'five': '5', 'six': '6', 'seven': '7', 'eight': '8', 'nine': '9',
-            'oh': '0'  # 'oh' is often used for zero
+            'oh': '0', 'o': '0',  # 'oh' and 'o' are often used for zero
+            'to': '2', 'too': '2', 'for': '4', 'ate': '8',  # Common mispronunciations
+            'ten': '10', 'eleven': '11', 'twelve': '12', 'thirteen': '13',
+            'fourteen': '14', 'fifteen': '15', 'sixteen': '16', 'seventeen': '17',
+            'eighteen': '18', 'nineteen': '19', 'twenty': '20', 'thirty': '30',
+            'forty': '40', 'fifty': '50', 'sixty': '60', 'seventy': '70',
+            'eighty': '80', 'ninety': '90'
         }
         
-        # Look for sequences of spoken digits
+        # Clean the text and remove common filler words
+        text = speech_text.lower().strip()
+        # Remove common filler words that might interfere
+        filler_words = ['um', 'uh', 'like', 'the', 'and', 'or', 'is', 'are']
+        for filler in filler_words:
+            text = text.replace(f' {filler} ', ' ')
+        
         words = text.split()
         digits = []
         
+        # Look for spoken digits
         for word in words:
             if word in spoken_digits:
-                digits.append(spoken_digits[word])
-            elif word.isdigit():
-                digits.append(word)
+                digit_value = spoken_digits[word]
+                # Handle multi-digit numbers by splitting them
+                if len(digit_value) > 1:
+                    for char in digit_value:
+                        digits.append(char)
+                else:
+                    digits.append(digit_value)
         
-        # If we found 10 digits, format as phone number
-        if len(digits) == 10:
-            return f"{''.join(digits[:3])}-{''.join(digits[3:6])}-{''.join(digits[6:])}"
+        # If no spoken digits found, look for actual digits
+        if not digits:
+            digits = re.findall(r'\d', speech_text)
         
-        # Pattern 3: Look for "area code" followed by number
-        area_code_pattern = r'area code\s*(\d{3})[,\s]*(\d{3})[,\s-]*(\d{4})'
-        match = re.search(area_code_pattern, text)
-        if match:
-            return f"{match.group(1)}-{match.group(2)}-{match.group(3)}"
+        # Debug logging
+        print(f"DEBUG: Input='{speech_text}' -> Words={words} -> Digits={digits}")
         
-        # Pattern 4: Look for any sequence of 10 consecutive digits
-        digits_only = re.findall(r'\d', speech_text)
-        if len(digits_only) >= 10:
-            # Take the first 10 digits
-            phone_digits = ''.join(digits_only[:10])
-            return f"{phone_digits[:3]}-{phone_digits[3:6]}-{phone_digits[6:]}"
-        
-        # Pattern 5: Look for phone number with parentheses (555) 123-4567
-        paren_pattern = r'\((\d{3})\)\s*(\d{3})[-\s]*(\d{4})'
-        match = re.search(paren_pattern, speech_text)
-        if match:
-            return f"{match.group(1)}-{match.group(2)}-{match.group(3)}"
-        
-        return None
+        return digits
     
     def _ask_next_question(self) -> str:
         """Ask the next screening question"""
@@ -226,14 +264,16 @@ class ClinicalTrialVoiceAgent:
             question_data = self.screening_questions[self.current_question_index]
             question = question_data["question"]
             
-            self.current_question_index += 1
             self.conversation_stage = "screening"
             
             self.conversation_log.append({
                 "stage": "screening",
                 "question": question,
-                "question_index": self.current_question_index - 1
+                "question_index": self.current_question_index
             })
+            
+            # Increment AFTER processing the current question
+            self.current_question_index += 1
             
             return question
         
@@ -297,7 +337,10 @@ class ClinicalTrialVoiceAgent:
                 "medications": self.patient_info.medications,
                 "pregnant": self.patient_info.pregnant,
                 "severe_conditions": self.patient_info.severe_conditions,
-                "contact_info": self.patient_info.contact_info
+                "contact_info": self.patient_info.contact_info,
+                "phone_area_code": self.patient_info.phone_area_code,
+                "phone_middle": self.patient_info.phone_middle,
+                "phone_last_four": self.patient_info.phone_last_four
             },
             "eligible": self._assess_eligibility(),
             "conversation_log": self.conversation_log
